@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "llming-flux"
+version = "0.1.0"
+description = "Base library for building document-knowledge MCP agents"
+license = "MIT"
+authors = ["Michael Ikemann"]
+readme = "README.md"
+packages = [{ include = "llming_flux" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openpyxl = "^3.1.0"
+pydantic = "^2.0.0"
+mcp = "^1.0.0"
+pdfplumber = ">=0.10.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
