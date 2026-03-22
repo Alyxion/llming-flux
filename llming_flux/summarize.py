@@ -138,8 +138,8 @@ def summarize_image_from_filename(filepath: Path) -> str:
     elif "dimension" in name or parent == "dimensions":
         lang = "German" if "_de" in name else "English" if "_en" in name else ""
         img_type = f"Technical dimension drawing{' (' + lang + ')' if lang else ''}"
-    elif "spray" in name:
-        img_type = "Spray pattern visualization"
+    elif "pattern" in name:
+        img_type = "Pattern visualization"
     elif "flow" in name:
         img_type = "Flow diagram"
     elif "logo" in name:

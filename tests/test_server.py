@@ -22,8 +22,8 @@ class TestMakeToolDefinitions:
         assert "mybot_overview" in names
 
     def test_custom_context(self):
-        tools = make_tool_definitions("x", "industrial spray catalog")
-        assert "industrial spray catalog" in tools[0]["description"]
+        tools = make_tool_definitions("x", "industrial product catalog")
+        assert "industrial product catalog" in tools[0]["description"]
 
     def test_schemas_valid(self):
         tools = make_tool_definitions("t")

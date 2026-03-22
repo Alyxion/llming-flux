@@ -50,7 +50,7 @@ For plant protection.
 
     def test_parse_tags(self, sample_md):
         doc = parse_markdown_file(sample_md)
-        assert "spray" in doc.tags
+        assert "search" in doc.tags
         assert "document" in doc.tags
         assert "drift" in doc.tags
 
@@ -82,12 +82,12 @@ For plant protection.
 
     def test_custom_image_classifier(self, sample_md):
         def my_classifier(alt, path):
-            if "spray" in alt.lower() or "spray" in path.lower():
-                return "spray_pattern"
+            if "pattern" in alt.lower() or "pattern" in path.lower():
+                return "image_pattern"
             return "generic"
 
         doc = parse_markdown_file(sample_md, image_classifier=my_classifier)
-        # Our test file doesn't have spray images, so both should be "generic"
+        # Our test file doesn't have pattern images, so both should be "generic"
         assert all(img.image_type == "generic" for img in doc.images)
 
 
