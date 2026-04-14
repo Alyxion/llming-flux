@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{ include = "llming_flux" }]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.14"
 openpyxl = "^3.1.0"
 pydantic = "^2.0.0"
 mcp = "^1.0.0"

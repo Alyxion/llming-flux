@@ -473,19 +473,37 @@ class DocumentKBServer(InProcessMCPServer):
         self._image_hints: dict | None = None
         self._tools: list[dict] | None = None
         self._blob_checked = False
+        self._blob_ready = True  # Assumed ready until proven otherwise
 
     async def _ensure_blob_data(self) -> None:
-        """Pull data from blob storage if local DB is missing. Called once lazily."""
+        """Pull data from blob storage if local DB is missing.
+
+        Runs the download in a background task so it never blocks the event
+        loop. Returns immediately — ``call_tool`` checks ``_blob_ready``
+        and returns a user-friendly message while data is loading.
+        """
         if self._blob_checked:
             return
         self._blob_checked = True
         if any(self._data_dir.glob("*.db")):
+            self._blob_ready = True
             return  # Local data exists
+        # Start download in background — don't block the event loop
+        self._blob_ready = False
+        import asyncio
+        asyncio.create_task(self._background_blob_pull())
+
+    async def _background_blob_pull(self) -> None:
+        """Download data from blob storage in the background."""
         try:
             from .blob_sync import ensure_data
+            logger.info("[%s] Starting background data download...", self.prefix.upper())
             await ensure_data(self.prefix, self._data_dir)
+            self._blob_ready = True
+            logger.info("[%s] Background data download complete.", self.prefix.upper())
         except Exception as e:
             logger.warning("[%s] Blob sync failed: %s", self.prefix.upper(), e)
+            self._blob_ready = True  # Allow fallback to error in _get_db
 
     def _get_db(self) -> Database:
         if self._db is None:
@@ -557,6 +575,11 @@ class DocumentKBServer(InProcessMCPServer):
     async def call_tool(self, name: str, arguments: dict) -> str:
         try:
             await self._ensure_blob_data()
+            if not getattr(self, '_blob_ready', True):
+                return json.dumps({
+                    "status": "loading",
+                    "message": f"Knowledge base is being prepared (downloading data). Please try again in a moment.",
+                })
             db = self._get_db()
             result = self._dispatch(db, name, arguments)
             result_str = json.dumps(result, indent=2, default=str)

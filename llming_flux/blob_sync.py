@@ -227,6 +227,8 @@ async def ensure_data(agent: str, data_dir: Path, sas_url: str | None = None) ->
         logger.info("[PULL] %s data up to date (%d files)", agent, len(remote_manifest))
         return True
 
+    import time as _t
+    _pull_start = _t.monotonic()
     logger.info("[PULL] %s: downloading %d/%d files", agent, len(to_download), len(remote_manifest))
 
     async with aiohttp.ClientSession() as session:
@@ -250,7 +252,8 @@ async def ensure_data(agent: str, data_dir: Path, sas_url: str | None = None) ->
             except Exception as e:
                 logger.error("[PULL] Error downloading %s: %s", blob_path, e)
 
-    logger.info("[PULL] %s sync complete", agent)
+    _pull_ms = (_t.monotonic() - _pull_start) * 1000
+    logger.info("[PULL] %s sync complete (%.0fms, %d files)", agent, _pull_ms, len(to_download))
     return any(data_dir.glob("*.db"))
 
 
